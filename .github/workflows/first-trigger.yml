@@ -1,18 +1,46 @@
 
-name: My First GitHub Actions
+name: Playwright Automation Execution
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  demo:
+  playwright-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Print Welcome Message
-        run: echo "Hello Students Academy"
+      # Step 1: Get source code from GitHub
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Print Success Message
-        run: echo "My First trigger is executed"
+      # Step 2: Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Step 3: Install project dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # Step 4: Install Playwright Chromium browser
+      - name: Install Playwright Browser
+        run: npx playwright install --with-deps chromium
+
+      # Step 5: Execute Playwright tests
+      - name: Run Playwright Tests
+        run: npx playwright test
+
+      # Step 6: Upload test report
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
